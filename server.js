@@ -1,9 +1,10 @@
 const express = require('express');
 require('dotenv').config();
+const { Pool } = require('pg');
 var port = process.env.PORT || 5000;
 var app = express();
 const connectionString = process.env.DATABASE_URL
-const pool = new Pool({connectionString: connectionString});
+
 app.set('port', port)
    .use(express.static(__dirname + "/public"))
    .set('views', __dirname + '/views')
@@ -14,6 +15,7 @@ app.set('port', port)
    .get('/getPerson', function(req, res){
     var sql = "SELECT * FROM People WHERE id = $1::int";
         var params = [req.query.id]
+        const pool = new Pool({connectionString: connectionString});
         pool.query(sql, params, (err, result) => {
             if (err) {
                 console.log("Error in query: ");
