@@ -2,26 +2,31 @@ CREATE TABLE users(
     user_id SERIAL PRIMARY KEY,
     first_name varchar(40),
     last_name varchar(40),
-    birth VARCHAR(50)
+    password_ varchar(100),
+    email VARCHAR(50)
 );
-CREATE TABLE relationships(
-    relationship_id SERIAL PRIMARY KEY,
-    parent_id int REFERENCES users(user_id),
-    child_id int REFERENCES users(user_id)
+
+CREATE TABLE coins(
+    coin_id SERIAL PRIMARY KEY,
+    symbol VARCHAR(8),
+    name VARCHAR(30)
 );
-INSERT INTO users(first_name, last_name, birth)
-VALUES ('John', 'Wayne', '2015-10-15');
-INSERT INTO users(first_name, last_name, birth)
-VALUES ('Jim', 'Wayne', '2000-10-15');
-INSERT INTO users(first_name, last_name, birth)
-VALUES ('Joe', 'Mama', '1990-10-15');
-INSERT INTO users(first_name, last_name, birth)
-VALUES ('Taco', 'John', '1980-10-15');
-INSERT INTO users(first_name, last_name, birth)
-VALUES ('Taco', 'John', '1970-10-15');
-INSERT INTO relationships(parent_id, child_id)
-VALUES (1, 2);
-INSERT INTO relationships(parent_id, child_id)
-VALUES (2, 3);
-INSERT INTO relationships(parent_id, child_id)
-VALUES (3, 4);
+
+CREATE TABLE user_coins(
+    user_coin_id SERIAL PRIMARY KEY,
+    user_id int REFERENCES users(user_id),
+    coin_id int REFERENCES coins(coin_id),
+    quantity int
+);
+
+
+INSERT INTO users(first_name, last_name, password_, email)
+VALUES ('John', 'Wayne', 'ajdfkjri4', 'jonw@gmail.com');
+INSERT INTO users(first_name, last_name, password_, email)
+VALUES ('Bill', 'Gates', 'ajdfkjri4', 'bill@gmail.com');
+INSERT INTO coins(symbol, name)
+VALUES ('BTC', 'Bitcoin');
+INSERT INTO coins(symbol, name)
+VALUES ('ETH', 'Ethereum');
+INSERT INTO coins(symbol, name)
+VALUES ('ADA', 'Cardano');

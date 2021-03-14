@@ -1,69 +1,27 @@
-const express = require('express');
-require('dotenv').config();
-const {Pool} = require('pg');
-var port = process.env.PORT || 5000;
+process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = 0;
+var express = require("express");
 var app = express();
-const connectionString = process.env.DATABASE_URL
+require('dotenv').config();
 
-app.set('port', port)
-    .use(express.static(__dirname + "/public"))
-    .set('views', __dirname + '/views')
-    .set('view engine', 'ejs')
-    .get('/', (req, res) => {
-        res.sendFile('index.html', {
-            root: __dirname + '/public'
-        });
-    })
-    .get('/getPerson', function (req, res) {
-        var sql = "SELECT * FROM users WHERE user_id = $1::int";
-        var params = [req.query.id]
-        const pool = new Pool({
-            connectionString: connectionString
-        });
-        process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"
-        pool.query(sql, params, (err, result) => {
-            if (err) {
-                console.log("Error in query: ");
-                console.log(err);
-            }
-            console.log(result.rows);
-            res.json(result.rows);
-        });
-    })
-    .get('/getParents', function (req, res) {
-        var sql = "SELECT * FROM relationships r INNER JOIN users u ON u.user_id = r.parent_id WHERE parent_id = $1::int";
-        var params = [req.query.id]
-        const pool = new Pool({
-            connectionString: connectionString
-        });
-        process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"
-        pool.query(sql, params, (err, result) => {
-            if (err) {
-                console.log("Error in query: ");
-                console.log(err);
-            }
-            console.log(result)
-            // console.log(result.rows);
-            // res.json(result.rows);
-        });
-    })
-    .get('/getChildren', function (req, res) {
-        var sql = "SELECT * FROM relationships r INNER JOIN users u ON u.user_id = r.child_id WHERE child_id = $1::int";
-        var params = [req.query.id]
-        const pool = new Pool({
-            connectionString: connectionString
-        });
-        process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"
-        pool.query(sql, params, (err, result) => {
-            if (err) {
-                console.log("Error in query: ");
-                console.log(err);
-            }
-            console.log(result)
-            // console.log(result.rows);
-            // res.json(result.rows);
-        });
-    })
-    .listen(app.get('port'), () => {
-        console.log('Listening on port: ' + app.get('port'));
-    })
+const controller = require("./controllers/controller.js");
+
+var session = require("express-session");
+
+app.use(session({
+  secret: "my-secret",
+  resave: false,
+  saveUninitialized: true
+}));
+
+app.use(express.static('public'));
+app.use(express.json()); 
+app.use(express.urlencoded({extended: true})); 
+app.set('port', (process.env.PORT || 5000));
+app.get('/userData', controller.getUserData);
+app.get('/registration')
+app.post('/login', controller.loginUser);
+app.post('/logout', controller.logoutUser);
+app.post('/register', controller.registerUser);
+app.listen(app.get("port"), function() {
+    console.log("Now listening on port: ", app.get("port"));
+});
