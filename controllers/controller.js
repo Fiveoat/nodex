@@ -7,19 +7,17 @@ function registerUser(req, res) {
     let email = req.body.email;
     model.registerUser(first_name, last_name, password, email, function (error, results) {
         if (error == null) {
-            return res.redirect("/account.html");
+            return res.redirect('index.html');
         }
     })
 }
 
-function favoriteCoin(req, res) {
-    let first_name = req.body.first_name;
-    let last_name = req.body.last_name;
-    let password = req.body.password;
-    let email = req.body.email;
-    model.favoriteCoin(first_name, last_name, password, email, function (error, results) {
+function getUserData(req, res) {
+    // let user_id = req.body.user_id;
+    let user_id = 1;
+    model.getUserCoinData(user_id, function (error, results) {
         if (error == null) {
-            return res.redirect("/account.html");
+            return res.redirect('index.html');
         }
     })
 }
@@ -90,6 +88,5 @@ module.exports = {
     loginUser: loginUser,
     logoutUser: logoutUser,
     verifyLogin: verifyLogin,
-    favoriteCoin, favoriteCoin,
-    addCoinHolding, addCoinHolding
+    addCoinHolding: addCoinHolding
 }
