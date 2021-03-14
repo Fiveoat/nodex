@@ -13,11 +13,45 @@ function registerUser(req, res) {
 }
 
 function getUserData(req, res) {
-    // let user_id = req.body.user_id;
+    // let get user_id from session
     let user_id = 1;
     model.getUserCoinData(user_id, function (error, results) {
         if (error == null) {
-            return res.redirect('index.html');
+            let data = [];
+            results.rows.forEach(function (row){
+                let price = 1;
+                let total = row.quantity * price;
+                data.push({
+                    Name: row.name,
+                    Symbol: row.symbol,
+                    Price: price,
+                    Quantity: row.quantity,
+                    Total: total
+                })
+            })
+            res.render('account', {
+                'data': data
+            });
+        }
+    })
+}
+
+function getPriceData(req, res) {
+    model.getPriceData(function (error, results) {
+        if (error == null) {
+            let data = [];
+            results.rows.forEach(function (row){
+                let price = 1;
+                data.push({
+                    Name: row.name,
+                    Symbol: row.symbol,
+                    // Price: row.last_known_price
+                    Price: price
+                })
+            })
+            res.render('account', {
+                'data': data
+            });
         }
     })
 }
@@ -34,14 +68,14 @@ function addCoinHolding(req, res) {
     })
 }
 
-function getUserData(req, res) {
-    let user_id = req.query.user_id;
-    model.getUserData(user_id, function (error, results) {
-        if (error == null) {
-            return res.json(results);
-        }
-    });
-}
+// function getUserData(req, res) {
+//     let user_id = req.query.user_id;
+//     model.getUserData(user_id, function (error, results) {
+//         if (error == null) {
+//             return res.json(results);
+//         }
+//     });
+// }
 
 function loginUser(req, res) {
     let result = {
@@ -81,6 +115,20 @@ function verifyLogin(req, res, next) {
     }
 }
 
+// function get_rate(req, res) {
+//     let mail_type = req.query.mail_type;
+//     let weight = Number(req.query.weight);
+//     let price = Number.parseFloat(calculate_price(mail_type, weight)).toFixed(2);
+//     if (mail_type === 'Stamped' || mail_type === 'Metered') {
+//         mail_type = "Letter " + mail_type
+//     }
+//     res.render('rate', {
+//         mail_type: mail_type,
+//         weight: weight,
+//         price: price
+//     });
+// }
+
 
 module.exports = {
     registerUser: registerUser,
@@ -88,5 +136,6 @@ module.exports = {
     loginUser: loginUser,
     logoutUser: logoutUser,
     verifyLogin: verifyLogin,
-    addCoinHolding: addCoinHolding
+    addCoinHolding: addCoinHolding,
+    getPriceData: getPriceData
 }

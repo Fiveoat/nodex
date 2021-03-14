@@ -13,10 +13,18 @@ function getUserCoinData(user_id, callback) {
         if (err) {
             throw err;
         } else {
-            var results = {
-                list: db_results.rows
-            };
-            callback(null, results);
+            callback(null, db_results);
+        }
+    })
+}
+
+function getPriceData(callback) {
+    let sql = "SELECT DISTINCT * FROM coins;";
+    pool.query(sql, function (err, db_results) {
+        if (err) {
+            throw err;
+        } else {
+            callback(null, db_results);
         }
     })
 }
@@ -54,4 +62,5 @@ module.exports = {
     registerUser: registerUser,
     getUserCoinData: getUserCoinData,
     addCoinHolding: addCoinHolding,
+    getPriceData: getPriceData
 }

@@ -1,41 +1,38 @@
 process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = 0;
 let express = require("express");
-let app = express();
+
 require('dotenv').config();
-app.set('view engine', 'html');
+
 const controller = require("./controllers/controller.js");
-
-var session = require("express-session");
-
-app.use(session({
-    secret: "my-secret",
-    resave: false,
-    saveUninitialized: true
-}));
-app.use(express.static("public"));
-app.use(express.json());
-app.use(express.urlencoded({
-    extended: true
-}));
-app.set('port', (process.env.PORT || 5000));
-app.get('/', function (req, res, next) {
-    res.render('index', {
-        title: 'Express'
+let app = express();
+app.set('port', (process.env.PORT || 5000))
+    .use(express.static(__dirname + "/public"))
+    .set('views', __dirname + '/views')
+    .set('view engine', 'ejs')
+    .use(express.json())
+    .use(express.urlencoded({
+        extended: true
+    }))
+    .get('/', (req, res) => {
+        res.sendFile('index.html', {
+            root: __dirname + '/public'
+        })
+    })
+    .get('/registration', (req, res) => {
+        res.sendFile('registration.html', {
+            root: __dirname + '/public'
+        })
+    })
+    .get('/signin', (req, res) => {
+        res.sendFile('signin.html', {
+            root: __dirname + '/public'
+        })
+    })
+    .get('/account', controller.getUserData)
+    .get('/prices', controller.getPriceData)
+    .post('/login', controller.loginUser)
+    .post('/logout', controller.logoutUser)
+    .post('/register', controller.registerUser)
+    .listen(app.get("port"), function () {
+        console.log("Now listening on port: ", app.get("port"));
     });
-});
-app.get('/x', function (req, res, next) {
-    var data = {
-        studentList: ["Johnson", "Mary", "Peter", "Chin-su"]
-    };
-    res.render('x', {
-        students: data
-    });
-})
-app.get('/userData', controller.getUserData);
-app.get('/registration');
-app.post('/login', controller.loginUser);
-app.post('/logout', controller.logoutUser);
-app.post('/register', controller.registerUser);
-app.listen(app.get("port"), function () {
-    console.log("Now listening on port: ", app.get("port"));
-});

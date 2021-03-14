@@ -3,28 +3,37 @@
 
 <head>
     <title>ChainX</title>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🪙</text></svg>">
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🪙</text></svg>">
     <link rel="stylesheet" type="text/css" href="/main.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1" crossorigin="anonymous">
     <script src="https://code.jquery.com/jquery-3.3.1.js"
         integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60=" crossorigin="anonymous">
     </script>
-    <script>
-        $(function () {
-            $("#header").load("header.html");
-            $("#nav").load("nav.html");
-            $("#footer").load("footer.html");
-        });
-    </script>
 </head>
 
 <body>
     <header class="container">
-        <div id="header"></div>
+        <div class="container">
+            &ensp;<img class='logo' src="../logo.png"><a href="../"></img>
+        </div>
     </header>
     <nav class="container">
-        <div id="nav"></div>
+        <ul class="nav justify-content-end">
+            <li class="nav-item">
+                <a class="nav-link active" aria-current="page" href="../">Welcome&ensp;</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="../prices">Prices&ensp;</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="../account">My Account&ensp;</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="../signin">Sign In&ensp;</a>
+            </li>
+        </ul>
     </nav>
     <main>
         <div class="container">
@@ -52,14 +61,17 @@
                     </div>
                     <br><br><br><br>
                     <div class="row">
-                        <a class="btn btn-primary" href="registration.html">Need an account?</a>
+                        <a class="btn btn-primary" href="registration">Need an account?</a>
                     </div>
                 </div>
             </div>
         </div>
     </main>
     <footer class="container">
-        <div id="footer"></div>
+        <br><br>
+        <h6 class="container">©3021 Chain X 🪙</h6>
+        <br>
+        <br>
     </footer>
 </body>
 
