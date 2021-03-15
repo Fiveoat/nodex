@@ -1,9 +1,9 @@
-const {
-    Pool
-} = require("pg");
+process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = 0;
+const {Pool} = require("pg");
 const connectionString = process.env.DATABASE_URL;
 const pool = new Pool({
-    connectionString: connectionString
+    connectionString: connectionString,
+    ssl: {rejectUnauthorized: false}
 });
 
 
