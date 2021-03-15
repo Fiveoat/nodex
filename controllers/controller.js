@@ -20,7 +20,8 @@ function getUserData(req, res) {
         if (error == null) {
             let data = [];
             results.rows.forEach(function (row) {
-                let price = getCoinbaseCoinPrice()
+                // let price = getCoinbaseCoinPrice()
+                let price = 1;
                 let total = row.quantity * parseFloat(price);
                 data.push({
                     Name: row.name,
@@ -70,17 +71,6 @@ function addCoinHolding(req, res) {
 }
 
 
-
-function getCoinbaseCoinPrice() {
-    let reponse = $.ajax({
-        url: 'https://api.coinbase.com/v2/exchange-rates?currency=BTC',
-        async: false,
-        success: function (response) {
-            return response;
-        }
-    })
-    return reponse;
-}
 
 
 
