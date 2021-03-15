@@ -28,6 +28,7 @@ app.set('port', (process.env.PORT || 5000))
             root: __dirname + '/public'
         })
     })
+    // .get('/test', controller.getCoinbaseCoinPrice)
     .get('/account', controller.getUserData)
     .get('/prices', controller.getPriceData)
     .post('/login', controller.loginUser)

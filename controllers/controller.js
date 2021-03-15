@@ -1,5 +1,6 @@
 const model = require("../models/model.js");
 
+
 function registerUser(req, res) {
     let first_name = req.body.first_name;
     let last_name = req.body.last_name;
@@ -18,9 +19,9 @@ function getUserData(req, res) {
     model.getUserCoinData(user_id, function (error, results) {
         if (error == null) {
             let data = [];
-            results.rows.forEach(function (row){
-                let price = 1;
-                let total = row.quantity * price;
+            results.rows.forEach(function (row) {
+                let price = getCoinbaseCoinPrice()
+                let total = row.quantity * parseFloat(price);
                 data.push({
                     Name: row.name,
                     Symbol: row.symbol,
@@ -40,7 +41,7 @@ function getPriceData(req, res) {
     model.getPriceData(function (error, results) {
         if (error == null) {
             let data = [];
-            results.rows.forEach(function (row){
+            results.rows.forEach(function (row) {
                 let price = 1;
                 data.push({
                     Name: row.name,
@@ -63,19 +64,40 @@ function addCoinHolding(req, res) {
     let email = req.body.email;
     model.addCoinHolding(first_name, last_name, password, email, function (error, results) {
         if (error == null) {
-            return res.redirect("/account.html");
+            return res.redirect("/account");
         }
     })
 }
 
-// function getUserData(req, res) {
-//     let user_id = req.query.user_id;
-//     model.getUserData(user_id, function (error, results) {
-//         if (error == null) {
-//             return res.json(results);
-//         }
-//     });
+
+
+function getCoinbaseCoinPrice() {
+    let reponse = $.ajax({
+        url: 'https://api.coinbase.com/v2/exchange-rates?currency=BTC',
+        async: false,
+        success: function (response) {
+            return response;
+        }
+    })
+    return reponse;
+}
+
+
+
+
+// function getCoinbaseCoinPrice(req, res) {
+//     const fetch = require('node-fetch');
+//     fetch('https://api.coinbase.com/v2/exchange-rates?currency=BTC')
+//         .then((response) => {
+//             return response.json().then((data) => {
+//                 return data.data.rates['USD'];
+//             }).catch((err) => {
+//                 console.log(err);
+//             })
+//         });
 // }
+
+
 
 function loginUser(req, res) {
     let result = {
@@ -87,7 +109,7 @@ function loginUser(req, res) {
             success: true
         };
     }
-    return res.redirect("/account.html");
+    return res.redirect("/account");
 }
 
 function logoutUser(req, res) {
@@ -100,7 +122,7 @@ function logoutUser(req, res) {
             success: true
         };
     }
-    return res.redirect("/index.html");
+    return res.redirect("/");
 }
 
 function verifyLogin(req, res, next) {
@@ -137,5 +159,6 @@ module.exports = {
     logoutUser: logoutUser,
     verifyLogin: verifyLogin,
     addCoinHolding: addCoinHolding,
-    getPriceData: getPriceData
+    getPriceData: getPriceData,
+    // getCoinbaseCoinPrice: getCoinbaseCoinPrice
 }
