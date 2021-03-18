@@ -34,10 +34,13 @@
             <li class="nav-item">
                 <a class="nav-link" href="../signin">Sign In&ensp;</a>
             </li>
+            <li class="nav-item">
+                <a class="nav-link" href="../signout">Sign Out&ensp;</a>
+            </li>
         </ul>
     </nav>
     <main>
-        <h2 class="container">Welcome!</h2>
+        <h2 class="container">Welcome <%= first_name %>!</h2>
         <div class="container">
             <div class="row">
                 <div class="col-md">
@@ -45,30 +48,94 @@
                 </div>
             </div>
             <div class="container">
-                <div id="user_coins"></div>
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th scope="col">Name</th>
-                            <th scope="col">Symbol</th>
-                            <th scope="col">Quantity</th>
-                            <th scope="col">Price</th>
-                            <th scope="col">Total</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <% for(var i=0; i < data.length; i++) { %>
-                        <tr>
-                            <td><%= data[i].Name %></td>
-                            <td><%= data[i].Symbol %></td>
-                            <td><%= data[i].Quantity %></td>
-                            <td>$<%= data[i].Price %></td>
-                            <td>$<%= data[i].Total %></td>
-                        </tr>
-                        <% } %>
-                    </tbody>
-                </table>
-            </div>
+                <div class="row">
+                    <div class="col-md">
+                        <form method="POST" action="/addCoin">
+                            <div class="mb-3">
+                                <label for="password" class="form-label">Currency</label>
+                                <select class="form-select" name="symbol" aria-label="Default select example">
+                                    <option value="BTC">Bitcoin</option>
+                                    <option value="ETH">Ethereum</option>
+                                    <option value="ALGO">Algorand</option>
+                                    <option value="BAND">Band Protocol</option>
+                                    <option value="FIL">Filecoin</option>
+                                    <option value="OMG">OMG Network</option>
+                                    <option value="ETC">Ethereum Classic</option>
+                                    <option value="USDC">USD Coin</option>
+                                    <option value="XTZ">Tezos</option>
+                                    <option value="SNX">Synthetix Network Token</option>
+                                    <option value="KNC">Kyber Network</option>
+                                    <option value="UNI">Uniswap</option>
+                                    <option value="UMA">UMA</option>
+                                    <option value="COMP">Compound</option>
+                                    <option value="AAVE">Aave</option>
+                                    <option value="CGLD">Celo</option>
+                                    <option value="BAT">Basic Attention Token</option>
+                                    <option value="XLM">Stellar Lumens</option>
+                                    <option value="REN">Ren</option>
+                                    <option value="GRT">The Graph</option>
+                                    <option value="MANA">Decentraland</option>
+                                    <option value="MKR">Maker</option>
+                                    <option value="LRC">Loopring</option>
+                                    <option value="BAL">Balancer</option>
+                                    <option value="OXT">Orchid</option>
+                                    <option value="NMR">Numeraire</option>
+                                    <option value="NU">NuCypher</option>
+                                    <option value="CVC">Civic</option>
+                                    <option value="ZEC">Zcash</option>
+                                    <option value="ZRX">Ox</option>
+                                    <option value="USD">USD</option>
+                                    <option value="REP">Augur</option>
+                                    <option value="LINK">Chainlink</option>
+                                    <option value="DNT">districtOx</option>
+                                    <option value="ATOM">Cosmos</option>
+                                    <option value="USDC">USD Coin</option>
+                                    <option value="DASH">Dash</option>
+                                    <option value="LTC">Litecoin</option>
+                                    <option value="BNT">Bancor Network Token</option>
+                                </select>
+                                <div id="emailHelp" class="form-text">&ensp;Enter Currency.</div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="quantity" class="quantity">Quantity</label>
+                                <input type="number" name="quantity" step="any" min=0 class="form-control"
+                                    id="quantity">
+                                <div id="emailHelp" class="form-text">&ensp;Enter Quantity.</div>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Add</button>
+                        </form>
+                    </div>
+                </div>
+                <br>
+                <div id="user_coins">
+                    <h4 class="container">💰 Current Holdings Value : $<%= total %></h4>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th scope="col">Name</th>
+                                <th scope="col">Symbol</th>
+                                <th scope="col">Quantity</th>
+                                <th scope="col">Price</th>
+                                <th scope="col">Total</th>
+                                <th scope="col">Delete</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% for(var i=0; i < data.length; i++) { %>
+                            <tr>
+                                <td><%= data[i].Name %></td>
+                                <td><%= data[i].Symbol %></td>
+                                <td><%= data[i].Quantity %></td>
+                                <td>$<%= data[i].Price %></td>
+                                <td>$<%= data[i].Total %></td>
+                                <td>
+                                    <a class="btn btn-danger" href="deleteCoin?symbol=<%= data[i].Symbol %>">Delete</a>
+                                </td>
+                            </tr>
+                            <% } %>
+                        </tbody>
+                    </table>
+                </div>
     </main>
     <footer class="container">
         <br><br>

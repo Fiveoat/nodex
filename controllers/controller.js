@@ -1,5 +1,11 @@
 const model = require("../models/model.js");
-
+const https = require('https');
+const fetch = require('node-fetch');
+let coins = [
+    'MKR', 'LRC', 'ALGO', 'ZEC', 'ZRX', 'USD', 'REP', 'LINK', 'DNT', 'ATOM', 'DASH', 'LTC', 'BNT', 'FIL', 'ETC',
+    'UNI', 'USDC', 'XTZ', 'BAND', 'ETH', 'COMP', 'KNC', 'BAT', 'UMA', 'CGLD', 'NU', 'MANA', 'AAVE', 'CVC', 'XLM', 'GRT', 'BAL',
+    'SNX', 'OXT', 'REN', 'NMR', 'BTC', 'OMG'
+]
 
 function registerUser(req, res) {
     let first_name = req.body.first_name;
@@ -8,50 +14,76 @@ function registerUser(req, res) {
     let email = req.body.email;
     model.registerUser(first_name, last_name, password, email, function (error, results) {
         if (error == null) {
-            return res.redirect('index.html');
+            return res.redirect('/signin');
         }
+    })
+}
+
+function updateCoinPrice(req, res) {
+    coins.forEach(function (coin) {
+        https.get('https://api.coinbase.com/v2/exchange-rates?currency=' + coin, (response) => {
+            let data = '';
+            response.on('data', (chunk) => {
+                data += chunk;
+            });
+            response.on('end', () => {
+                price = parseFloat(JSON.parse(data)['data']['rates']['USD']).toFixed(2);
+                model.updatePriceData(coin, price, function (error, results) {
+                    if (error == null) {}
+                })
+            })
+        })
     })
 }
 
 function getUserData(req, res) {
-    // let get user_id from session
-    let user_id = 1;
-    model.getUserCoinData(user_id, function (error, results) {
-        if (error == null) {
-            let data = [];
-            results.rows.forEach(function (row) {
-                // let price = getCoinbaseCoinPrice()
-                let price = 1;
-                let total = row.quantity * parseFloat(price);
-                data.push({
-                    Name: row.name,
-                    Symbol: row.symbol,
-                    Price: price,
-                    Quantity: row.quantity,
-                    Total: total
+    updateCoinPrice();
+    sess = req.session;
+    let user_id = 0;
+    if (sess.user_id) {
+        user_id = sess.user_id;
+        first_name = sess.first_name;
+        model.getUserCoinData(user_id, function (error, results) {
+            let combined_total = 0;
+            if (error == null) {
+                let return_data = [];
+                results.rows.forEach(function (row) {
+                    let total = (row.quantity * row.last_known_price).toFixed(2);
+                    combined_total += parseFloat(total);
+                    return_data.push({
+                        Name: row.name,
+                        Symbol: row.symbol,
+                        Price: row.last_known_price,
+                        Quantity: row.quantity,
+                        Total: total
+                    })
                 })
-            })
-            res.render('account', {
-                'data': data
-            });
-        }
-    })
+                res.render('account', {
+                    'data': return_data,
+                    'total': combined_total.toFixed(2),
+                    'first_name': first_name
+                });
+            }
+        })
+    } else {
+        res.redirect('/signin')
+    }
 }
 
+
 function getPriceData(req, res) {
+    updateCoinPrice();
     model.getPriceData(function (error, results) {
         if (error == null) {
             let data = [];
             results.rows.forEach(function (row) {
-                let price = 1;
                 data.push({
                     Name: row.name,
                     Symbol: row.symbol,
-                    // Price: row.last_known_price
-                    Price: price
+                    Price: row.last_known_price,
                 })
             })
-            res.render('account', {
+            res.render('prices', {
                 'data': data
             });
         }
@@ -59,96 +91,66 @@ function getPriceData(req, res) {
 }
 
 function addCoinHolding(req, res) {
-    let first_name = req.body.first_name;
-    let last_name = req.body.last_name;
-    let password = req.body.password;
-    let email = req.body.email;
-    model.addCoinHolding(first_name, last_name, password, email, function (error, results) {
+    sess = req.session;
+    let user_id = sess.user_id;
+    let symbol = req.body.symbol;
+    let quantity = req.body.quantity;
+    model.addCoinHolding(user_id, symbol, quantity, function (error, results) {
         if (error == null) {
-            return res.redirect("/account");
+            getUserData(req, res);
         }
     })
 }
 
-
-
-
-
-
-// function getCoinbaseCoinPrice(req, res) {
-//     const fetch = require('node-fetch');
-//     fetch('https://api.coinbase.com/v2/exchange-rates?currency=BTC')
-//         .then((response) => {
-//             return response.json().then((data) => {
-//                 return data.data.rates['USD'];
-//             }).catch((err) => {
-//                 console.log(err);
-//             })
-//         });
-// }
-
-
+function deleteCoinHolding(req, res) {
+    sess = req.session;
+    let user_id = sess.user_id;
+    let symbol = req.query.symbol;
+    model.deleteCoinHolding(user_id, symbol, function (error, results) {
+        if (error == null) {
+            getUserData(req, res);
+        }
+    })
+}
 
 function loginUser(req, res) {
-    let result = {
-        success: false
-    };
-    if (req.body.email == "admin" && req.body.password == "password") {
-        req.session.user = req.body.username;
-        result = {
-            success: true
-        };
-    }
-    return res.redirect("/account");
+    let email = req.body.email;
+    let input_password = req.body.password;
+    model.getPassword(email, function (error, results) {
+        if (error == null) {
+            try {
+                user = results.list[0];
+                let password = user.password_;
+                if (password == input_password) {
+                    sess = req.session;
+                    sess.email = user.email;
+                    sess.first_name = user.first_name;
+                    sess.user_id = user.user_id;
+                    getUserData(req, res);
+                } else {
+                    return res.redirect('/signin')
+                }
+            } catch (err) {
+                return res.redirect('/signin')
+            }
+        }
+    })
 }
 
 function logoutUser(req, res) {
-    var result = {
-        success: false
-    };
-    if (req.session.user) {
+    if (req.session.user_id) {
         req.session.destroy();
-        result = {
-            success: true
-        };
     }
-    return res.redirect("/");
+    return res.redirect("/signin");
 }
-
-function verifyLogin(req, res, next) {
-    if (req.session.user) {
-        next();
-    } else {
-        var result = {
-            success: false,
-            message: "Access Denied"
-        };
-        res.status(401).json(result);
-    }
-}
-
-// function get_rate(req, res) {
-//     let mail_type = req.query.mail_type;
-//     let weight = Number(req.query.weight);
-//     let price = Number.parseFloat(calculate_price(mail_type, weight)).toFixed(2);
-//     if (mail_type === 'Stamped' || mail_type === 'Metered') {
-//         mail_type = "Letter " + mail_type
-//     }
-//     res.render('rate', {
-//         mail_type: mail_type,
-//         weight: weight,
-//         price: price
-//     });
-// }
-
 
 module.exports = {
     registerUser: registerUser,
     getUserData: getUserData,
     loginUser: loginUser,
     logoutUser: logoutUser,
-    verifyLogin: verifyLogin,
     addCoinHolding: addCoinHolding,
     getPriceData: getPriceData,
-    // getCoinbaseCoinPrice: getCoinbaseCoinPrice
+    updateCoinPrice: updateCoinPrice,
+    deleteCoinHolding: deleteCoinHolding
 }

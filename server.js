@@ -5,6 +5,11 @@ require('dotenv').config();
 
 const controller = require("./controllers/controller.js");
 let app = express();
+var session = require('express-session');
+app.use(session({
+    secret: 'ssshhhhh'
+}));
+
 app.set('port', (process.env.PORT || 5000))
     .use(express.static(__dirname + "/public"))
     .set('views', __dirname + '/views')
@@ -28,11 +33,12 @@ app.set('port', (process.env.PORT || 5000))
             root: __dirname + '/public'
         })
     })
-    // .get('/test', controller.getCoinbaseCoinPrice)
+    .post('/addCoin', controller.addCoinHolding)
+    .get('/deleteCoin', controller.deleteCoinHolding)
+    .get('/signout', controller.logoutUser)
     .get('/account', controller.getUserData)
     .get('/prices', controller.getPriceData)
     .post('/login', controller.loginUser)
-    .post('/logout', controller.logoutUser)
     .post('/register', controller.registerUser)
     .listen(app.get("port"), function () {
         console.log("Now listening on port: ", app.get("port"));
