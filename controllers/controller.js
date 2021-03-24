@@ -1,6 +1,8 @@
 const model = require("../models/model.js");
 const https = require('https');
 const fetch = require('node-fetch');
+const bcrypt = require('bcrypt');
+const saltRounds = 10;
 let coins = [
     'MKR', 'LRC', 'ALGO', 'ZEC', 'ZRX', 'USD', 'REP', 'LINK', 'DNT', 'ATOM', 'DASH', 'LTC', 'BNT', 'FIL', 'ETC',
     'UNI', 'USDC', 'XTZ', 'BAND', 'ETH', 'COMP', 'KNC', 'BAT', 'UMA', 'CGLD', 'NU', 'MANA', 'AAVE', 'CVC', 'XLM', 'GRT', 'BAL',
@@ -12,11 +14,16 @@ function registerUser(req, res) {
     let last_name = req.body.last_name;
     let password = req.body.password;
     let email = req.body.email;
-    model.registerUser(first_name, last_name, password, email, function (error, results) {
-        if (error == null) {
-            return res.redirect('/signin');
-        }
-    })
+    bcrypt.genSalt(saltRounds, function (err, salt) {
+        bcrypt.hash(password, salt, function (err, hash) {
+            console.log(hash);
+            model.registerUser(first_name, last_name, hash, email, function (error, results) {
+                if (error == null) {
+                    return res.redirect('/signin');
+                }
+            })
+        });
+    });
 }
 
 function updateCoinPrice(req, res) {
@@ -36,6 +43,10 @@ function updateCoinPrice(req, res) {
     })
 }
 
+function numberWithCommas(x) {
+    return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
+
 function getUserData(req, res) {
     updateCoinPrice();
     sess = req.session;
@@ -53,14 +64,14 @@ function getUserData(req, res) {
                     return_data.push({
                         Name: row.name,
                         Symbol: row.symbol,
-                        Price: row.last_known_price,
-                        Quantity: row.quantity,
-                        Total: total
+                        Price: numberWithCommas(row.last_known_price),
+                        Quantity: numberWithCommas(row.quantity),
+                        Total: numberWithCommas(total)
                     })
                 })
                 res.render('account', {
                     'data': return_data,
-                    'total': combined_total.toFixed(2),
+                    'total': numberWithCommas(combined_total.toFixed(2)),
                     'first_name': first_name
                 });
             }
@@ -80,7 +91,7 @@ function getPriceData(req, res) {
                 data.push({
                     Name: row.name,
                     Symbol: row.symbol,
-                    Price: row.last_known_price,
+                    Price: numberWithCommas(row.last_known_price),
                 })
             })
             res.render('prices', {
@@ -120,16 +131,23 @@ function loginUser(req, res) {
         if (error == null) {
             try {
                 user = results.list[0];
-                let password = user.password_;
-                if (password == input_password) {
-                    sess = req.session;
-                    sess.email = user.email;
-                    sess.first_name = user.first_name;
-                    sess.user_id = user.user_id;
-                    getUserData(req, res);
-                } else {
-                    return res.redirect('/signin')
-                }
+                let hash = user.password_;
+                bcrypt.compare(input_password, hash, function (err, result) {
+                    console.log(result)
+                    if (error == null) {
+                        if (result == true) {
+                            sess = req.session;
+                            sess.email = user.email;
+                            sess.first_name = user.first_name;
+                            sess.user_id = user.user_id;
+                            getUserData(req, res);
+                        } else {
+                            return res.redirect('/signin');
+                        }
+                    } else {
+                        console.log(err);
+                    }
+                });
             } catch (err) {
                 return res.redirect('/signin')
             }
