@@ -1,7 +1,7 @@
 const model = require("../models/model.js");
 const https = require('https');
 const fetch = require('node-fetch');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const saltRounds = 10;
 let coins = [
     'MKR', 'LRC', 'ALGO', 'ZEC', 'ZRX', 'USD', 'REP', 'LINK', 'DNT', 'ATOM', 'DASH', 'LTC', 'BNT', 'FIL', 'ETC',
